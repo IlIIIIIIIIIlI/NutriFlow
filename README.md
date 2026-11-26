@@ -1,6 +1,10 @@
+# NutriFlow 1.2 — busca online
+
+Nova opção: **Alimentos → Buscar online**. Consulta produtos e fotos do Open Food Facts sem baixar a base inteira. A documentação da integração, limites e testes está em [ONLINE.md](ONLINE.md).
+
 # NutriFlow
 
-Primeira versão funcional local, em português, sem instalação de bibliotecas e sem serviço externo. Interface escura/amarela, responsiva, quatro refeições, catálogo editável, planos locais e PWA offline.
+Primeira versão funcional local, em português, sem instalação de bibliotecas e com busca online opcional no Open Food Facts. Interface escura/amarela, responsiva, quatro refeições, catálogo editável, planos locais e PWA offline.
 
 ## Executar e testar
 
@@ -70,4 +74,4 @@ Abra o endereço HTTPS publicado no Chrome do Android. Aguarde o carregamento of
 
 ## Arquivos
 
-`index.html`, `style.css`, `app.js`: interface; `core.js`: cálculos/validação; `foods.js`: catálogo; `assets/`: ilustrações e ícones; `sw.js` e `manifest.webmanifest`: PWA; `server.js`: servidor local; `tests/`: testes nativos do Node. Não há backend, telemetria ou integração remota.
+`index.html`, `style.css`, `app.js`: interface; `core.js`: cálculos/validação; `foods.js`: catálogo; `assets/`: ilustrações e ícones; `sw.js` e `manifest.webmanifest`: PWA; `server.js`: servidor local; `tests/`: testes nativos do Node. Não há backend nem telemetria própria. A busca opcional conecta ao Open Food Facts; consulte ONLINE.md.

@@ -1,3 +1,4 @@
+import {validOffMeta} from './off-data.js';
 export const keys=['kcal','p','c','f'];
 export const defaults={kcal:2400,p:130,c:308,f:72};
 export const mealNames=['Café da manhã','Almoço','Lanche','Jantar'];
@@ -27,7 +28,7 @@ export function validate(data){
  const fail=()=>{throw Error('Arquivo inválido: confira a versão, alimentos, metas e quantidades.');};
  const num=(v,max)=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=max;
  if(!data||data.version!==1||!Array.isArray(data.foods)||data.foods.length<1||data.foods.length>300||!Array.isArray(data.plans)||data.plans.length>100)fail();
- const ids=new Set();for(const f of data.foods){if(typeof f.id!=='string'||!/^[a-zA-Z0-9_-]{1,80}$/.test(f.id)||ids.has(f.id)||typeof f.name!=='string'||!f.name.trim()||f.name.length>100||!['p','c','f','fruit'].includes(f.group)||!keys.every(k=>num(f[k],k==='kcal'?1000:100))||!num(f.max,2000)||f.max===0||typeof f.basis!=='string'||f.basis.length>200||typeof f.source!=='string'||f.source.length>500)fail();ids.add(f.id);}
+ const ids=new Set();for(const f of data.foods){if(typeof f.id!=='string'||!/^[a-zA-Z0-9_-]{1,80}$/.test(f.id)||ids.has(f.id)||typeof f.name!=='string'||!f.name.trim()||f.name.length>100||!['p','c','f','fruit'].includes(f.group)||!keys.every(k=>num(f[k],k==='kcal'?1000:100))||!num(f.max,2000)||f.max===0||typeof f.basis!=='string'||f.basis.length>200||typeof f.source!=='string'||f.source.length>500)fail();if(f.off!==undefined&&!validOffMeta(f.off))fail();ids.add(f.id);}
  const plan=p=>{if(!p||typeof p.id!=='string'||p.id.length>80||typeof p.name!=='string'||!p.name.trim()||p.name.length>100||!p.goals||!keys.every(k=>num(p.goals[k],k==='kcal'?20000:2000))||!Array.isArray(p.meals)||p.meals.length!==4)fail();for(const meal of p.meals){if(!Array.isArray(meal)||meal.length>300)fail();const seen=new Set();for(const r of meal){if(!r||!ids.has(r.id)||seen.has(r.id)||!num(r.g,2000)||!num(r.max,2000)||r.max===0||typeof r.fixed!=='boolean')fail();seen.add(r.id);}}};
  plan(data.current);data.plans.forEach(plan);if(new Set(data.plans.map(p=>p.id)).size!==data.plans.length)fail();return data;
 }
