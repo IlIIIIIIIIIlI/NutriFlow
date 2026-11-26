@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {foods} from '../foods.js';import {total,equivalent,solve,validate,defaults,target} from '../core.js';
+const row=(id,g=0,max=300,fixed=false)=>({id,g,max,fixed});
+test('100 g crus e soma de todos os macros',()=>{assert.deepEqual(total([row('rice',100)],foods),{kcal:358,p:7.2,c:78.8,f:.3});const t=total([row('chicken',200),row('rice',50)],foods);assert.equal(t.kcal,417);assert.equal(t.p,46.6);assert.equal(t.c,39.4);assert.equal(t.f,6.15);});
+test('matriz de equivalências e divisão por zero',()=>{assert.equal(equivalent(foods.find(f=>f.id==='oil'),'f'),10);assert.equal(equivalent(foods.find(f=>f.id==='oil'),'p'),null);assert.ok(Math.abs(equivalent(foods.find(f=>f.id==='banana'),'fruit')-84.0336)<.001);});
+test('solver recupera alvo conhecido com limites',()=>{const rows=[row('rice',70,180),row('chicken',150),row('oil',12,35)],goal=total(rows,foods);const r=solve(rows.map(x=>({...x,g:0})),foods,goal);assert.ok(r.within);assert.ok(r.converged);r.rows.forEach((v,i)=>assert.ok(Math.abs(v.g-rows[i].g)<.2));});
+test('híbrido preserva fixo mesmo acima do limite',()=>{const r=solve([row('chicken',120,50,true),row('rice',0,100)],foods,{kcal:500,p:30,c:60,f:10},true);assert.equal(r.rows[0].g,120);assert.ok(r.rows[1].g<=100);});
+test('inviável e vazio não produzem NaN ou pesos negativos',()=>{for(const rows of [[],[row('oil',0,10)]]){const r=solve(rows,foods,defaults);assert.equal(r.within,false);assert.ok(Object.values(r.values).every(Number.isFinite));r.rows.forEach(x=>assert.ok(x.g>=0&&x.g<=x.max));}});
+test('metas zero e alimentos com zero nutrientes',()=>{const f={...foods[0],kcal:0,p:0,c:0,f:0};const r=solve([row(f.id,100)], [f],{kcal:0,p:0,c:0,f:0});assert.equal(r.rows[0].g,0);assert.ok(r.within);});
+test('almoço + jantar e dia inteiro',()=>{assert.equal(target(defaults,[1,3]).kcal,1440);assert.equal(target(defaults,[0,1,2,3]).kcal,2400);});
+const valid=()=>({version:1,foods:structuredClone(foods),current:{id:'a',name:'Teste',goals:{...defaults},meals:[[row('rice',100)],[],[],[]]},plans:[]});
+test('roundtrip JSON preserva quantidades e metas',()=>{const data=valid();assert.deepEqual(validate(JSON.parse(JSON.stringify(data))),data);});
+test('importação rejeita IDs desconhecidos, negativos, NaN e duplicatas',()=>{for(const modify of [d=>d.current.meals[0][0].id='unknown',d=>d.current.meals[0][0].g=-1,d=>d.foods[0].p=NaN,d=>d.foods.push(d.foods[0]),d=>d.current.meals.pop(),d=>d.version=2]){const d=valid();modify(d);assert.throws(()=>validate(d));}});
