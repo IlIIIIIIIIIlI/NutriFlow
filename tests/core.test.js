@@ -6,7 +6,7 @@ test('solver recupera alvo conhecido com limites',()=>{const rows=[row('rice',70
 test('híbrido preserva fixo mesmo acima do limite',()=>{const r=solve([row('chicken',120,50,true),row('rice',0,100)],foods,{kcal:500,p:30,c:60,f:10},true);assert.equal(r.rows[0].g,120);assert.ok(r.rows[1].g<=100);});
 test('inviável e vazio não produzem NaN ou pesos negativos',()=>{for(const rows of [[],[row('oil',0,10)]]){const r=solve(rows,foods,defaults);assert.equal(r.within,false);assert.ok(Object.values(r.values).every(Number.isFinite));r.rows.forEach(x=>assert.ok(x.g>=0&&x.g<=x.max));}});
 test('metas zero e alimentos com zero nutrientes',()=>{const f={...foods[0],kcal:0,p:0,c:0,f:0};const r=solve([row(f.id,100)], [f],{kcal:0,p:0,c:0,f:0});assert.equal(r.rows[0].g,0);assert.ok(r.within);});
-test('almoço + jantar e dia inteiro',()=>{assert.equal(target(defaults,[1,3]).kcal,1440);assert.equal(target(defaults,[0,1,2,3]).kcal,2400);});
+test('almoço + jantar e dia inteiro',()=>{assert.equal(target(defaults,[1,4]).kcal,1200);assert.equal(target(defaults,[0,1,2,3,4,5]).kcal,2400);});
 const valid=()=>({version:1,foods:structuredClone(foods),current:{id:'a',name:'Teste',goals:{...defaults},meals:[[row('rice',100)],[],[],[]]},plans:[]});
 test('roundtrip JSON preserva quantidades e metas',()=>{const data=valid();assert.deepEqual(validate(JSON.parse(JSON.stringify(data))),data);});
 test('importação rejeita IDs desconhecidos, negativos, NaN e duplicatas',()=>{for(const modify of [d=>d.current.meals[0][0].id='unknown',d=>d.current.meals[0][0].g=-1,d=>d.foods[0].p=NaN,d=>d.foods.push(d.foods[0]),d=>d.current.meals.pop(),d=>d.version=2]){const d=valid();modify(d);assert.throws(()=>validate(d));}});

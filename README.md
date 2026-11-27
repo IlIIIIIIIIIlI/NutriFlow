@@ -1,10 +1,16 @@
-# NutriFlow 1.2 — busca online
+# NutriFlow 1.3 — refeições personalizáveis
+
+Seis refeições iniciais: Café da manhã, Almoço, Café da tarde, Pré treino, Janta e Ceia. Em **Montar Refeições**, use **+ Adicionar refeição**, o lápis para editar nome/ilustração e a lixeira para remover (com confirmação e opção Desfazer). Cada plano admite de 1 a 12 refeições e mantém sua própria configuração. Os banners usam seis imagens ilustrativas geradas por IA, locais, incluídas no cache offline.
+
+Planos antigos de quatro refeições são migrados preservando alimentos e quantidades; Pré treino e Ceia começam vazios. As metas por refeição passam à distribuição abaixo. Adicionar/remover refeições renormaliza as frações, sem alterar pesos já informados.
+
+## Busca online
 
 Nova opção: **Alimentos → Buscar online**. Consulta produtos e fotos do Open Food Facts sem baixar a base inteira. A documentação da integração, limites e testes está em [ONLINE.md](ONLINE.md).
 
 # NutriFlow
 
-Primeira versão funcional local, em português, sem instalação de bibliotecas e com busca online opcional no Open Food Facts. Interface escura/amarela, responsiva, quatro refeições, catálogo editável, planos locais e PWA offline.
+Primeira versão funcional local, em português, sem instalação de bibliotecas e com busca online opcional no Open Food Facts. Interface escura/amarela, responsiva, seis refeições iniciais personalizáveis, catálogo editável, planos locais e PWA offline.
 
 ## Executar e testar
 
@@ -24,7 +30,7 @@ Não é necessário `npm install`. Para encerrar o servidor, Ctrl+C.
 
 ## Uso
 
-1. **Meu Dia**: veja os totais planejados e edite as metas. Padrões: 2400 kcal, 130 g P, 308 g C, 72 g G. Café 25%, almoço 30%, lanche 15%, jantar 30% (distribuição fixa nesta versão).
+1. **Meu Dia**: veja os totais planejados e edite as metas. Padrões: 2400 kcal, 130 g P, 308 g C, 72 g G. Distribuição inicial: café da manhã 20%, almoço 30%, café da tarde 15%, pré treino 10%, janta 20% e ceia 5%. As frações são normalizadas ao adicionar/remover refeições; a edição individual de percentuais não está disponível.
 2. **Alimentos**: busque, filtre, adicione ou edite composição por 100 g. A matriz apresenta pesos equivalentes a 25 g P, 30 g C, 10 g G e, para frutas, 20 g C. Todos os demais macros continuam contando.
 3. **Montar Refeições**: selecione vários alimentos de quaisquer categorias. Os novos começam com 0 g. Manual: informe os pesos. Automático: calcule todos os selecionados. Híbrido: marque “Fixo” nos pesos que devem ser preservados. Os limites editáveis aplicam-se apenas às quantidades ajustadas automaticamente; um fixo pode exceder o limite. O campo aceita até 2000 g por alimento/refeição.
 4. Alterne entre refeição, dia inteiro e preparo conjunto de almoço/jantar. A lista conjunta soma pesos crus/secos por alimento. O cálculo de um dia resolve cada refeição segundo sua fração da meta; não redistribui nutrientes livremente entre refeições.
@@ -45,9 +51,9 @@ Mínimos quadrados por descida coordenada, com pesos não negativos e tetos por 
 
 ## Offline, armazenamento e atualizações
 
-Após o primeiro acesso completo, aguarde “NutriFlow pronto para usar offline”. O service worker guarda HTML, JS, CSS, manifest e todas as imagens. O escopo e os caminhos são relativos ao subdiretório. Os caches são separados pelo escopo; não remove caches de outros aplicativos. Dados ficam no `localStorage` deste navegador/origem, sem conta ou sincronização. A chave é `nutriflow-v1`; duas instalações na mesma origem compartilham essa chave. Limpeza de dados do navegador remove planos: use backup JSON. Navegação privada, falta de espaço ou bloqueio de armazenamento podem impedir persistência; o aplicativo mostra aviso. Dados locais inválidos são preservados até a importação de backup válido.
+Após o primeiro acesso completo, aguarde “NutriFlow pronto para usar offline”. O service worker guarda HTML, JS, CSS, manifest e todas as imagens. O escopo e os caminhos são relativos ao subdiretório. Os caches são separados pelo escopo; não remove caches de outros aplicativos. Dados ficam no `localStorage` deste navegador/origem, sem conta ou sincronização. A chave é `nutriflow-v2`; os dados antigos em `nutriflow-v1` são migrados e a chave original é preservada; duas instalações na mesma origem compartilham essa chave. Limpeza de dados do navegador remove planos: use backup JSON. Navegação privada, falta de espaço ou bloqueio de armazenamento podem impedir persistência; o aplicativo mostra aviso. Dados locais inválidos são preservados até a importação de backup válido.
 
-Em uma atualização do código, incremente `v1` na constante `CACHE` de `sw.js`. Não usa `skipWaiting`: feche todas as abas/janelas do app e reabra para ativar a versão nova com segurança. Alterar somente os arquivos sem versionar o cache pode deixar a versão anterior ativa. O catálogo inicial não substitui automaticamente o catálogo já salvo no dispositivo.
+Em uma atualização do código, altere a versão na constante `CACHE` de `sw.js`. Não usa `skipWaiting`: feche todas as abas/janelas do app e reabra para ativar a versão nova com segurança. Alterar somente os arquivos sem versionar o cache pode deixar a versão anterior ativa. O catálogo inicial não substitui automaticamente o catálogo já salvo no dispositivo.
 
 ## Publicar no GitHub Pages (somente quando desejar)
 
@@ -64,7 +70,13 @@ Nada foi publicado por esta implementação. Quando decidir publicar:
 
 Abra o endereço HTTPS publicado no Chrome do Android. Aguarde o carregamento offline. No menu do Chrome, escolha a opção de instalar aplicativo/adicionar à tela inicial (o texto varia por versão) e confirme. Abra pelo ícone criado; teste em modo avião após a primeira carga. `localhost` do computador não é acessível como localhost do telefone; HTTP por IP da rede não oferece o mesmo suporte seguro a PWA. [Ajuda do Chrome](https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid).
 
-## Validação realizada
+## Validação da versão 1.3
+
+- 35 testes automatizados passaram, incluindo migração de planos, seis refeições, adição/remoção/desfazer, limites, metas proporcionais, JSON e cálculos com quantidades fixas.
+- Imagens locais e arquivos do cache conferidos; sintaxe JavaScript validada.
+- A verificação visual interativa desta atualização ficou bloqueada pela indisponibilidade do navegador de teste. A instalação em Android físico não foi testada.
+
+## Validação anterior (versão inicial)
 
 - 9 testes automatizados: soma de macros, equivalências e divisões por zero, recuperação de alvo conhecido, limites e fixos, inviabilidade/vazio, nutrientes/metas zero, metas agregadas, roundtrip JSON e rejeição de importações inválidas.
 - Navegador local sob `/NutriFlow/`: seleção múltipla, cálculo automático, salvar, duplicar e persistência após recarga.
